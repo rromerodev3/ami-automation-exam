@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.exam.model.MetalModel
 import com.example.exam.model.ProcessModel
 import com.example.exam.repositories.ProcessRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,13 +17,31 @@ class HomeViewModel @Inject constructor(
     private val processRepository: ProcessRepository
 ) : ViewModel() {
 
-    private val _elements = MutableLiveData<List<ProcessModel>>()
-    val elements: LiveData<List<ProcessModel>> get() = _elements
+    private val _processes = MutableLiveData<List<ProcessModel>>()
+    val processes: LiveData<List<ProcessModel>> get() = _processes
 
-    fun loadData() {
+    private val _metals = MutableLiveData<List<MetalModel>>()
+    val metals: LiveData<List<MetalModel>> get() = _metals
+
+    fun getProcess() {
         viewModelScope.launch {
-            val response = processRepository.getRemoteProcess()
-            _elements.postValue(response)
+            // TODO: Endpoint down, instead fake data
+//            val response = processRepository.getRemoteProcess()
+//            _elements.postValue(response)
+            _processes.postValue(
+                listOf(
+                    ProcessModel("1", "a", "1a"),
+                    ProcessModel("2", "b", "2b"),
+                    ProcessModel("3", "c", "3c"),
+                )
+            )
+        }
+    }
+
+    fun getMetals() {
+        viewModelScope.launch {
+            val metals = processRepository.getLocalMetals()
+            _metals.postValue(metals)
         }
     }
 }

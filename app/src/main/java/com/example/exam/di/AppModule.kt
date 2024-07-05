@@ -1,8 +1,11 @@
 package com.example.exam.di
 
 import android.content.Context
+import androidx.room.Room
 import com.example.exam.api.ProcessService
 import com.example.exam.constants.Constants
+import com.example.exam.db.AppDatabase
+import com.example.exam.db.MetalDao
 import com.example.exam.repositories.ProcessRepository
 import dagger.Module
 import dagger.Provides
@@ -18,6 +21,23 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object AppModule {
 
+    @Provides
+    @Singleton
+    fun provideAppDatabase(@ApplicationContext appContext: Context): AppDatabase {
+        return Room.databaseBuilder(
+            appContext,
+            AppDatabase::class.java,
+            "database_prepare_sqlite"
+        )
+        .createFromAsset("database.sqlite")
+        .build()
+    }
+
+    @Provides
+    fun provideMetalDao(appDatabase: AppDatabase): MetalDao {
+        return appDatabase.metalDao()
+    }
+
     @Singleton
     @Provides
     fun provideRetrofit(@ApplicationContext appContext: Context): Retrofit {
@@ -28,8 +48,8 @@ object AppModule {
     }
 
     @Provides
-    fun providesService(retrofit: Retrofit) = retrofit.create(ProcessService::class.java)
+    fun providesService(retrofit: Retrofit): ProcessService = retrofit.create(ProcessService::class.java)
 
     @Provides
-    fun provideProcessRepository(remoteDataSource: ProcessService) = ProcessRepository(remoteDataSource)
+    fun provideProcessRepository(remoteDataSource: ProcessService, localDataSource: MetalDao) = ProcessRepository(remoteDataSource, localDataSource)
 }
